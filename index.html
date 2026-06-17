@@ -25,6 +25,7 @@
 </head>
 
 <body>
+
     <div class="corner-ui">
         <div class="countdown-container" aria-label="Countdown to event">
             <div id="timer">
@@ -35,6 +36,7 @@
             </div>
         </div>
         <button id="music-toggle" aria-label="Play background music">▶ Play</button>
+        <button id="petal-toggle" aria-label="Stop petal animation">✿ On</button>
     </div>
 
     <audio id="bg-music" loop>
@@ -257,7 +259,10 @@
     </div>
 
     <script>
+        /* ── COUNTDOWN ── */
         const EVENT_DATE = new Date("November 15, 2026 15:00:00");
+        const PETAL_CAP = 30;    // max petals alive at once
+        const PETAL_RATE = 1200;  // ms between each new petal
 
         /* ── COUNTDOWN ── */
         function updateCountdown() {
@@ -280,8 +285,8 @@
             document.getElementById("seconds").textContent = String(seconds).padStart(2, "0");
         }
 
-        setInterval(updateCountdown, 1000);
         updateCountdown();
+        setInterval(updateCountdown, 1000);
 
         /* ── MUSIC TOGGLE ── */
         const music = document.getElementById("bg-music");
@@ -302,41 +307,113 @@
 
         /* ── PETALS ── */
         (function initPetals() {
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
             const container = document.getElementById("petals-container");
+            const petalBtn = document.getElementById("petal-toggle");
             const colors = ["#f5b0cb", "#a2ca9a", "#ffffff"];
 
+            let petalInterval = null;
+            let petalsActive = false;
+
             function createPetal() {
+                // Hard cap
+                if (container.querySelectorAll(".js-petal").length >= 30) return;
+
                 const petal = document.createElement("div");
                 petal.classList.add("js-petal");
 
                 const width = Math.floor(Math.random() * 8) + 8;
                 const height = Math.floor(width * 1.4);
-                const leftPos = (Math.random() * 92 + 4).toFixed(2);
-                const duration = (Math.random() * 5 + 7).toFixed(2);
-                const drift = Math.floor(Math.random() * 60) - 30;
+                const left = (Math.random() * 92 + 4).toFixed(2);
+                const duration = (Math.random() * 5000 + 7000); // ms
+                const drift = Math.floor(Math.random() * 100) - 50;
                 const rotation = Math.floor(Math.random() * 360) + 180;
                 const color = colors[Math.floor(Math.random() * colors.length)];
 
                 petal.style.cssText = `
-                width: ${width}px;
-                height: ${height}px;
-                left: ${leftPos}%;
-                background: ${color};
-                animation-duration: ${duration}s;
-            `;
-                petal.style.setProperty("--drift", `${drift}px`);
-                petal.style.setProperty("--rotation", `${rotation}deg`);
+            position: absolute;
+            top: -25px;
+            left: ${left}%;
+            width: ${width}px;
+            height: ${height}px;
+            background: ${color};
+            border-radius: 60% 40% 60% 40% / 50% 50% 60% 40%;
+            pointer-events: none;
+            will-change: transform, opacity;
+        `;
 
                 container.appendChild(petal);
-                petal.addEventListener("animationend", () => petal.remove(), { once: true });
+
+                // Web Animations API — works on all modern iOS/Android
+                const anim = petal.animate([
+                    {
+                        transform: `translate3d(0, 0, 0) rotate(0deg)`,
+                        opacity: 0
+                    },
+                    {
+                        opacity: 0.8,
+                        offset: 0.15
+                    },
+                    {
+                        opacity: 0.6,
+                        offset: 0.85
+                    },
+                    {
+                        transform: `translate3d(${drift}px, 105vh, 0) rotate(${rotation}deg)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: duration,
+                    easing: "linear",
+                    fill: "forwards"
+                });
+
+                anim.onfinish = () => {
+                    if (petal.parentNode) petal.remove();
+                };
+
+                setTimeout(() => {
+                    if (petal.parentNode) petal.remove();
+                }, duration + 2000);
             }
 
-            for (let i = 0; i < 8; i++) {
-                setTimeout(createPetal, Math.random() * 3000);
+            function startPetals() {
+                petalsActive = true;
+                petalBtn.textContent = "✿ On";
+                petalBtn.classList.add("active");
+                petalBtn.setAttribute("aria-label", "Stop petal animation");
+
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(createPetal, Math.random() * 2000);
+                }
+                petalInterval = setInterval(createPetal, 1200);
             }
-            setInterval(createPetal, 1200);
+
+            function stopPetals() {
+                petalsActive = false;
+                petalBtn.textContent = "✿ Off";
+                petalBtn.classList.remove("active");
+                petalBtn.setAttribute("aria-label", "Start petal animation");
+
+                clearInterval(petalInterval);
+                petalInterval = null;
+
+                container.querySelectorAll(".js-petal").forEach(p => p.remove());
+            }
+
+            petalBtn.addEventListener("click", () => {
+                if (petalsActive) {
+                    stopPetals();
+                } else {
+                    startPetals();
+                }
+            });
+
+            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                startPetals();
+            } else {
+                petalBtn.textContent = "✿ Off";
+                petalBtn.setAttribute("aria-label", "Start petal animation");
+            }
         })();
     </script>
 

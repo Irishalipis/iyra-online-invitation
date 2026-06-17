@@ -74,37 +74,12 @@ body::before {
     overflow: hidden;
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
-}
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;}
 
 .js-petal {
     position: absolute;
-    top: -50px;
-    border-radius: 60% 40% 60% 40% / 50% 50% 60% 40%;
-    opacity: 0;
     pointer-events: none;
-    -webkit-animation: fall-down 10s linear forwards;
-    animation: fall-down 10s linear forwards;
-}
-
-@keyframes fall-down {
-    0% {
-        transform: translate3d(0, 0, 0) rotate(0deg);
-        opacity: 0;
-    }
-
-    15% {
-        opacity: 0.8;
-    }
-
-    85% {
-        opacity: 0.6;
-    }
-
-    100% {
-        transform: translate3d(var(--drift), 105vh, 0) rotate(var(--rotation));
-        opacity: 0;
-    }
 }
 
 @-webkit-keyframes fall-down {
@@ -127,6 +102,25 @@ body::before {
     }
 }
 
+@keyframes fall-down {
+    0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 0.8;
+    }
+
+    85% {
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: translate3d(var(--drift), 105vh, 0) rotate(var(--rotation));
+        opacity: 0;
+    }
+}
 
 /* ─── CORNER UI ──────────────────────────────────────────── */
 .corner-ui {
@@ -140,11 +134,9 @@ body::before {
     justify-items: end;
 }
 
-.corner-ui:hover {
-    opacity: 1;
-}
-
-#music-toggle {
+#music-toggle,
+#petal-toggle,
+.countdown-container {
     height: 34px;
     display: flex;
     align-items: center;
@@ -153,40 +145,46 @@ body::before {
     border: 1px solid rgba(233, 190, 107, 0.4);
     border-radius: 20px;
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     font-family: var(--font-display);
     color: rgba(233, 190, 107, 0.8);
     font-size: 0.72rem;
     white-space: nowrap;
     padding: 0 14px;
-    cursor: pointer;
-    letter-spacing: 0.08em;
-    transition: opacity 0.4s ease, background 0.2s;
     opacity: 0.4;
-    transition: opacity 0.4s ease, background 0.2s;
+    transition: opacity 0.4s ease, background 0.2s ease;
 }
 
-.corner-ui:hover #music-toggle {
+.countdown-container {
+    border-radius: 12px;
+    opacity: 1;
+    cursor: default;
+}
+
+#music-toggle,
+#petal-toggle {
+    cursor: pointer;
+    letter-spacing: 0.08em;
+}
+
+.corner-ui:hover #music-toggle,
+.corner-ui:hover #petal-toggle {
     opacity: 1;
 }
 
-
 #music-toggle:hover,
-#music-toggle:focus-visible {
+#music-toggle:focus-visible,
+#petal-toggle:hover,
+#petal-toggle:focus-visible {
     background: rgba(233, 190, 107, 0.12);
     outline: 1px solid rgba(233, 190, 107, 0.5);
     outline-offset: 2px;
 }
 
-.countdown-container {
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(20, 7, 11, 0.5);
-    border: 1px solid rgba(233, 190, 107, 0.4);
-    border-radius: 12px;
-    backdrop-filter: blur(8px);
-    padding: 0 14px;
+#petal-toggle.active {
+    color: var(--gold);
+    border-color: rgba(233, 190, 107, 0.8);
+    background: rgba(233, 190, 107, 0.1);
     opacity: 1;
 }
 
@@ -195,6 +193,8 @@ body::before {
     display: flex;
     align-items: baseline;
     gap: 3px;
+    color: rgba(233, 190, 107, 0.8);
+    font-size: 0.72rem;
 }
 
 #timer span {
@@ -336,6 +336,7 @@ body::before {
 }
 
 @keyframes pulse {
+
     0%,
     100% {
         opacity: 0.3;
@@ -476,7 +477,6 @@ body::before {
     max-width: 860px;
     margin: 0 auto;
     justify-items: center;
-
 }
 
 .name-list li {
@@ -548,6 +548,7 @@ body::before {
     .scroll-hint,
     .js-petal {
         animation: none;
+        -webkit-animation: none;
     }
 
     .name-list li {
@@ -603,14 +604,16 @@ body::before {
     .hero-image-wrap img {
         width: 350px;
     }
+
+    .name-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 @media (max-width: 420px) {
-    .corner-ui {
-        gap: 5px;
-    }
 
     #music-toggle,
+    #petal-toggle,
     .countdown-container {
         font-size: 0.65rem;
         height: 30px;
