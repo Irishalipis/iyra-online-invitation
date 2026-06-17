@@ -623,4 +623,10 @@ body::before {
     #timer span {
         font-size: 0.95rem;
     }
+
+    .hero-tagline {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+    }
 }
