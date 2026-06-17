@@ -569,6 +569,12 @@ body::before {
     .name-list li {
         padding-left: 0;
     }
+
+    .hero-tagline {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+    }
 }
 
 @media (min-width: 1025px) {
